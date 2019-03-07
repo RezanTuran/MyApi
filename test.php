@@ -43,7 +43,7 @@ function doRequest($endpoint, $data)
  */
 
 
-
+    // --------###  Databskopplingen ###---------- //
 $mysqli = new mysqli("localhost", "root", "root", "hemmashoppen");
 
 /* check connection */
@@ -51,47 +51,116 @@ if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
     exit();
 }
- 
-$query = "SELECT * FROM jos_shopper_products limit 0,5";
-$query = "SELECT * FROM jos_shopper_productcategories limit 0,5";
+
+//--------------------------------------------------------------------------------------------------------//
+
+//---- ### Produkter ------### //
+
+// $query = "SELECT * FROM jos_shopper_products limit 10";
 
 
+// if ($result = $mysqli->query($query)) {
+
+//     /* fetch object array */
+//     while ($row = $result->fetch_object()) {
+//         // https://developers.shopware.com/developers-guide/rest-api/api-resource-article/#post-(create)
+//         // Produkt från hemmashoppen $row
+//         // Skapa produkt och varianter i shopware.
+     
+//         $data = [
+//             'name' => $row->name,
+//             'taxId' => 1,
+//             'active' =>1,   
+//             'description' =>$row->shortdesc,
+//             'descriptionLong' => $row->longdesc,
+//             'metaTitle'=> $row->name,
+//             'added' =>$row->promotionFlag_expire_at,
+//             'categories' => array(
+//                 array('id' =>1),
+//             ),
+//             'mainDetail' => [
+//                 'number' =>	$row->id,
+//                 'supplierNumber' => '22',
+//                 'inStock' => 5,
+//                 'active' =>1,
+//                 'prices' => array(
+//                     array(
+//                         'price' => $row->hsprice,
+//                     ),
+//                 ),
+//                 ],    
+//         ];
+
+//         var_dump(doRequest("articles", $data));
+//     }
+    
+//     $result->close();
+// }
+
+//--------------------------------------------------------------------------------------------------------//
+
+//---- ### Kategorier ------### //
+
+// $query = "SELECT * FROM jos_shopper_productcategories limit 5";
+// if ($result = $mysqli->query($query)) {
+
+    
+//     while ($row = $result->fetch_object()) {
+//         $data = [
+//             'parentId' => 0,
+//             'name'=>$row->name,
+//             'metaDescription'=>$row->description,
+//             'active'=>1,
+            
+//         ];
+
+//         var_dump(doRequest("categories", $data));
+//     }
+    
+//     $result->close();
+// }
+
+//--------------------------------------------------------------------------------------------------------//
+
+// ---- ### Märke ------### //
+
+// $query = "SELECT * FROM jos_shopper_brands limit 10";
+// if ($result = $mysqli->query($query)) {
+
+    
+//     while ($row = $result->fetch_object()) {
+//         $data = [
+//             'name'=>$row->name,
+            
+            
+//         ];
+
+//         var_dump(doRequest("manufacturers", $data));
+//     }
+    
+//     $result->close();
+// }
+
+//--------------------------------------------------------------------------------------------------------//
+
+// ---- ### Bilder ------### //
+
+$query = "SELECT * FROM jos_shopper_products_images limit 10";
 if ($result = $mysqli->query($query)) {
 
-    /* fetch object array */
+    
     while ($row = $result->fetch_object()) {
-        // https://developers.shopware.com/developers-guide/rest-api/api-resource-article/#post-(create)
-        // Produkt från hemmashoppen $row
-        // Skapa produkt och varianter i shopware.
-     
         $data = [
-            'name' => $row->name,
-            'taxId' => 1,
-            'supplierId' => 1,
-            'active' =>1,
-            'description' =>$row->shortdesc,
-            'descriptionLong' => $row->longdesc,
-            'metaTitle'=> $row->name,
-            'added' =>$row->promotionFlag_expire_at,
-            'mainDetail' => [
-                'number' =>	$row->id,
-                'supplierNumber' => '22',
-                'inStock' => 5,
-                'prices' => array(
-                    array(
-                        'price' => $row->hsprice,
-                    )
-                    
-                    ),
-
-            ]
+            'album'=>1,
+            'file'=>'/Users/pxlstr/Desktop/Hemmashoppens\Bilder/upload',
+            'description'=>$row->visible_detail,
+            
+            
+            
         ];
 
-        var_dump(doRequest("articles", $data));
+        var_dump(doRequest("media", $data));
     }
-
-    /* free result set */
     
     $result->close();
 }
-
