@@ -58,7 +58,7 @@ if ($result = $mysqli->query($query)) {
             'descriptionLong' => $row->longdesc,
             'metaTitle'=> $row->name,
             'added' =>$row->promotionFlag_expire_at,
-            'supplierId' =>$row->brand_id,
+            //'supplierId' =>$row->name,
             //  'categories' => array(
             //      array('id' =>3),
          //), 
@@ -85,25 +85,25 @@ if ($result = $mysqli->query($query)) {
 
 // ---- ### Kategorier ------### //
 
-// $query = "SELECT * FROM jos_shopper_productcategories limit 5";
-// if ($result = $mysqli->query($query)) {
+$query = "SELECT * FROM jos_shopper_productcategories limit 10";
+if ($result = $mysqli->query($query)) {
 
     
-//     while ($row = $result->fetch_object()) {
-//         $data = [
-//             'parentId' => 1,
-//             'name'=>$row->name,
-//             'metaDescription'=>$row->description,
-//             'active'=>1,
-//             'position'=>0,
+    while ($row = $result->fetch_object()) {
+        $data = [
+            'parentId' => 1,
+            'name'=>$row->name,
+            'metaDescription'=>$row->description,
+            'active'=>1,
+            'position'=>0,
             
-//         ];
+        ];
 
-//         var_dump(doRequest("categories", $data));
-//     }
+        var_dump(doRequest("categories", $data));
+    }
     
-//     $result->close();
-// }
+    $result->close();
+}
 
 // //--------------------------------------------------------------------------------------------------------//
 
@@ -129,23 +129,23 @@ if ($result = $mysqli->query($query)) {
 
 //---- ### Bilder ------### //
 
-// $query = "SELECT * FROM jos_shopper_products_images limit 5";
-// if ($result = $mysqli->query($query)) {
+$query = "SELECT * FROM jos_shopper_products_images limit 10";
+if ($result = $mysqli->query($query)) {
 
     
-//     while ($row = $result->fetch_object()) {
-//         $data = [
-//             'album'=>-1,
-//             'name'=>$row->order,
-//             'file'=>'http://restapi/bilder/upload/productimage.'.$row->id.'.'.$row->extension,
-//             'description'=>$row->visible_detail,
-//         ];
+    while ($row = $result->fetch_object()) {
+        $data = [
+            'album'=>-1,
+            'name'=>$row->order,
+            'file'=>'http://restapi/bilder/upload/productimage.'.$row->id.'.'.$row->extension,
+            'description'=>$row->visible_detail,
+        ];
 
-//         var_dump(doRequest("media", $data));
-//     }
+        var_dump(doRequest("media", $data));
+    }
     
-//     $result->close();
-// }
+    $result->close();
+}
 
 //--------------------------------------------------------------------------------------------------------//
 

@@ -16,13 +16,16 @@ function doRequest($endpoint, $data)
     $errors = curl_error($ch);
     curl_close($ch);
 
-    echo $postdata;
+    var_dump($errors);
 
     return $out;
 }
-
   header('Access-Control-Allow-Origin: *');
   header('Content-Type: application/json');
+
+
+
+
 
 $mysqli = new mysqli("localhost", "root", "root", "hemmashoppen");
 
@@ -34,86 +37,20 @@ if (mysqli_connect_errno()) {
 
 
 //---- ### Produkter ------### //
- $query = "SELECT * FROM  jos_shopper_products 
- WHERE jos_shopper_products.parent_id = 0";
 
-//-- ### Images ----### // 
-$allImages = [];
-$imageQuery = "SELECT * FROM jos_shopper_products_images ORDER BY id DESC";
-if ($result = $mysqli->query($imageQuery)) {
-    while ($row = $result->fetch_object()) {
-        $pid = $row->product_id;
-        if(!isset($allImages[$pid])) {
-            $allImages[$pid] = [];
-        }
-        $allImages[$row->product_id][] = $row;   
-    }
-}
-//--- ### PDF Filer ----### //
-$allFiles = [];
-$fileQuery = "SELECT * FROM jos_shopper_products_files ORDER BY id DESC";
-if ($result = $mysqli->query($fileQuery)) {
-    while ($row = $result->fetch_object()) {
-        $pid = $row->product_id;
-        if(!isset($allFiles[$pid])) {
-            $allFiles[$pid] = [];
-        }
-        $allFiles[$row->product_id][] = $row;   
-    }
-}
-// --- ### Varianter --- ### //
-// $allVariants = [];
-// $variantQuery = "SELECT * FROM jos_shopper_products WHERE parent_id > 0";
-// if ($result = $mysqli->query($variantQuery)) {
-//     while ($row = $result->fetch_object()) {
-//         $variants = [];
-//          if(isset($allVariants[$row->id])) {
-//             foreach($allVariants[$row->id] as $parent_id) {
-//                  $variants [] = [
-//                      'name' => 'Varianter',
-//                      'active' => true,
-//                      'articleId' => 1,
-//                      'unitId' => 1,
-//                      'number' => '33',
-//                      'position' => 1,
-//                         'options' => array(
-//                             'active' => true,
-//                             'name' => 'Rezan',
-//                             'name' => 'Turan',
-//                     )
-//                  ];
-//                 }
-//             }  
-//     }
-// }
+$query = "SELECT * FROM jos_shopper_products INNER JOIN jos_shopper_products_images ON 
+jos_shopper_products.id = jos_shopper_products_images.product_id limit 10";
+
 
 if ($result = $mysqli->query($query)) {
+
     /* fetch object array */
     while ($row = $result->fetch_object()) {
         // https://developers.shopware.com/developers-guide/rest-api/api-resource-article/#post-(create)
         // Produkt från hemmashoppen $row
         // Skapa produkt och varianter i shopware.
-        $images = [];
-        if(isset($allImages[$row->id])) {
-            foreach($allImages[$row->id] as $idx => $img) {
-                $images[] = [
-                    'link' => 'http://restapi/bilder/upload/productimage.'.$img->id.'.'.$img->extension,
-                    'main' => ($idx == 0) ? 1 : 0,
-                    'position' => $idx,
-                ];
-            }
-        }
-        $downloads = [];
-        if(isset($allFiles[$row->id])) {
-            foreach($allFiles[$row->id] as $idx => $dock) {
-                $downloads[] = [
-                    'link' => 'http://restapi/bilder/filer/productfile.'.$dock->id.'.'.$dock->extension,
-                    'main' => ($idx == 0) ? 1 : 0,
-                    'position' => $idx,
-                ];
-            }
-        }
         
+     
         $data = [
             'name' => $row->name,
             'taxId' => 1,
@@ -123,9 +60,10 @@ if ($result = $mysqli->query($query)) {
             'metaTitle'=> $row->name,
             'added' =>$row->promotionFlag_expire_at,
             'supplierId' => $row->brand_id,
-            'categories' => array( 
+            'categories' => array( //Kategori bara 3
                 array('id' =>3),
             ),
+            
             'mainDetail' => [
                 'number' =>	$row->id,
                 'supplierNumber' => "22", //$row->brand_id, // Produkt nummer
@@ -137,15 +75,62 @@ if ($result = $mysqli->query($query)) {
                     )
                     ),
                 ],
-            'images' => $images,
-            'downloads' => $downloads,
-            //'configuratorSet' => $variants,
+            'images' => array(
+                    array(
+                        'link' => 'http://restapi/bilder/upload/productimage.'.$row->id.'.'.$row->extension,
+                        'main' => 1,
+                        'position' => 1,
+                    ),
+                ),
+                
+            // 'downloads' => array(
+            //         array(
+            //             'link' => 'http://restapi/bilder/filer/productfile.'.$row->id.'.'.pdf,
+            //             'main' => 1,
+            //             'position' => 1,
+            //         ),
+            //     ),
+
+            // If parent_id. Om det finns produkter som har samma parent_id som produktens egna id
+            'configuratorSet' => array(
+                'groups' => array(
+                    array(
+                        'name' => 'Varianter',
+                        'options' => array(
+                            // For each parent_id
+                            array('name' => 'Salt&Pepparkvarn: Vulcanic (Orangea) '),
+                            array('name' => 'Salt&Pepparkvarn: Ocean (Grön/Blåa)'),
+                            array('name' => 'Salt&Pepparkvarn: Cerise (röda)'),
+                            array('name' => 'Salt&Pepparkvarn: Svarta')
+                            // End for each
+                        )
+                    )
+                )
+            ),
+            // End parent_id
+
+            'variants' => array(
+                array(
+                    'isMain' => true,
+                    'active' => true,
+                    'number' => $row->id,
+                    'inStock' => 15,
+                    'additionaltext' => 'Yellow',
+                    'configuratorOptions' => array(
+                        array('group' => 'Variants', 'option' => 'Salt&Pepparkvarn: Vulcanic (Orangea)'),
+                    ),
+                    'prices' => array(
+                        array(
+                            'price' => $row->hsprice,
+                        ),
+                    ),
+                ),
+            )
             
-            
-                        
+                    
             ];
             
-        doRequest("articles", $data);
+        var_dump(doRequest("articles", $data));
     }
     
     $result->close();
