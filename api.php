@@ -5,7 +5,7 @@ function doRequest($endpoint, $data)
 {
     $ch = curl_init();
     $user = 'admin';
-    $pass = '75cbUrRd2khGG3EI5KnZOOSIEMPJ2FxA06W5uGJC';
+    $pass = 'rT4sXTZT68hIoD3zefZmFzEEIVQXJv5KPqcmrufv';
     curl_setopt($ch, CURLOPT_URL, "http://{$user}:{$pass}@shopwarenew/api/{$endpoint}");
     curl_setopt($ch, CURLOPT_POST, 1);
 
@@ -35,7 +35,7 @@ if (mysqli_connect_errno()) {
 
 //---- ### Produkter ------### //
  $query = "SELECT * FROM  jos_shopper_products 
- WHERE jos_shopper_products.parent_id = 0";
+ WHERE jos_shopper_products.parent_id = 0 limit 100";
 
 //-- ### Images ----### // 
 $allImages = [];
@@ -62,30 +62,26 @@ if ($result = $mysqli->query($fileQuery)) {
     }
 }
 // --- ### Varianter --- ### //
-// $allVariants = [];
-// $variantQuery = "SELECT * FROM jos_shopper_products WHERE parent_id > 0";
-// if ($result = $mysqli->query($variantQuery)) {
-//     while ($row = $result->fetch_object()) {
-//         $variants = [];
-//          if(isset($allVariants[$row->id])) {
-//             foreach($allVariants[$row->id] as $parent_id) {
-//                  $variants [] = [
-//                      'name' => 'Varianter',
-//                      'active' => true,
-//                      'articleId' => 1,
-//                      'unitId' => 1,
-//                      'number' => '33',
-//                      'position' => 1,
-//                         'options' => array(
-//                             'active' => true,
-//                             'name' => 'Rezan',
-//                             'name' => 'Turan',
-//                     )
-//                  ];
-//                 }
-//             }  
-//     }
-// }
+$allVariants = [];
+$variantQuery = "SELECT * FROM jos_shopper_products WHERE parent_id > 0 ";
+if ($result = $mysqli->query($variantQuery)) {
+    while ($row = $result->fetch_object()) {
+         if(!isset($allVariants[$row->id])) {
+            $allVariants[$row->id] = [];
+         }
+            $allVariants[$row->id] = [
+                'isMain' => true,
+                'number' => 1,
+                'inStock' => 15,
+                'additionaltext' => $row->name,
+                'prices' => array(
+                    array(
+                        'price' => $row->hsprice,
+                    )
+                ),    
+            ];
+        }
+}
 
 if ($result = $mysqli->query($query)) {
     /* fetch object array */
@@ -128,7 +124,7 @@ if ($result = $mysqli->query($query)) {
             ),
             'mainDetail' => [
                 'number' =>	$row->id,
-                'supplierNumber' => "22", //$row->brand_id, // Produkt nummer
+                'supplierNumber' => "22",
                 'inStock' => 5,
                 'active' =>true,
                 'prices' => array(
@@ -139,7 +135,7 @@ if ($result = $mysqli->query($query)) {
                 ],
             'images' => $images,
             'downloads' => $downloads,
-            //'configuratorSet' => $variants,
+            'variants' => $allVariants[$row->id],
             
             
                         
